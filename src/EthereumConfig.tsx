@@ -20,6 +20,7 @@ const { chains, provider } = configureChains(
     ],
 );
 
+// Mutates its state after 5 seconds adding two wallets.
 const useWallets = () => {
   const [wallets, setWallets] = useState([])
 
@@ -41,7 +42,7 @@ function EthereumConfig({ children }: { children: React.ReactNode }) {
       groupName: 'Recommended',
       wallets: [
         // @ts-ignore
-        ...wallets.map(wallet => wallet({ chains })),
+        ...wallets.map(wallet => wallet({ chains })), // 'wallets' is an empty list on the first render.
         metaMaskWallet({ chains })
       ],
     }]
