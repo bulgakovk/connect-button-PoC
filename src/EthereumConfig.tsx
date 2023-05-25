@@ -1,5 +1,4 @@
-import { alchemyProvider } from 'wagmi/providers/alchemy';
-import { configureChains, createClient } from 'wagmi';
+import { configureChains, createConfig } from 'wagmi';
 import { mainnet } from 'wagmi/chains';
 import { publicProvider } from 'wagmi/providers/public';
 import { WagmiConfig } from "wagmi";
@@ -7,18 +6,7 @@ import { RainbowKitProvider, connectorsForWallets } from "@rainbow-me/rainbowkit
 import { metaMaskWallet, coinbaseWallet, braveWallet } from "@rainbow-me/rainbowkit/wallets";
 import { useEffect, useMemo, useState } from 'react';
 
-const { chains, provider } = configureChains(
-    [mainnet],
-    [
-      alchemyProvider({
-        apiKey: '4Ow2G3LYC6SXr_AOesCG8Fi0_bxTGf1x',
-        priority: 0,
-      }),
-      publicProvider({
-        priority: 1,
-      }),
-    ],
-);
+const { chains, publicClient } = configureChains([mainnet], [publicProvider()]);
 
 // Mutates its state after 5 seconds adding two wallets.
 const useWallets = () => {
@@ -48,14 +36,14 @@ function EthereumConfig({ children }: { children: React.ReactNode }) {
     }]
   ), [wallets])
 
-  const wagmiClient = useMemo(() => createClient({
+  const wagmiConfig = useMemo(() => createConfig({
     autoConnect: true,
     connectors,
-    provider
+    publicClient
   }), [connectors])
 
   return (
-      <WagmiConfig client={wagmiClient}>
+      <WagmiConfig config={wagmiConfig}>
         <RainbowKitProvider chains={chains}>{children}</RainbowKitProvider>
       </WagmiConfig>
   );
