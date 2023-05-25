@@ -1,40 +1,34 @@
-import { configureChains, createConfig } from 'wagmi';
+import { configureChains, createConfig, WagmiConfig } from 'wagmi';
 import { mainnet } from 'wagmi/chains';
 import { publicProvider } from 'wagmi/providers/public';
-import { WagmiConfig } from "wagmi";
-import { RainbowKitProvider, connectorsForWallets } from "@rainbow-me/rainbowkit";
-import { metaMaskWallet, coinbaseWallet, braveWallet } from "@rainbow-me/rainbowkit/wallets";
 import { useEffect, useMemo, useState } from 'react';
+
+import { CoinbaseWalletConnector } from 'wagmi/connectors/coinbaseWallet'
+import { MetaMaskConnector } from 'wagmi/connectors/metaMask'
 
 const { chains, publicClient } = configureChains([mainnet], [publicProvider()]);
 
 // Mutates its state after 5 seconds adding two wallets.
-const useWallets = () => {
-  const [wallets, setWallets] = useState([])
+const useConnectors = () => {
+  const [connectors, setConnectors] = useState([new MetaMaskConnector({ chains })])
 
   useEffect(() => {
     setTimeout(() => {
+      if (connectors.length >= 2) return
+
       // @ts-ignore
-      setWallets([coinbaseWallet, braveWallet])
+      setConnectors([...connectors, new CoinbaseWalletConnector({
+        chains,
+        options: { appName: 'wagmi' },
+      })])
     }, 5000)
   })
 
-  return wallets
+  return connectors
 }
 
 function EthereumConfig({ children }: { children: React.ReactNode }) {
-  const wallets = useWallets()
-
-  const connectors = useMemo(() => connectorsForWallets([
-    {
-      groupName: 'Recommended',
-      wallets: [
-        // @ts-ignore
-        ...wallets.map(wallet => wallet({ chains })), // 'wallets' is an empty list on the first render.
-        metaMaskWallet({ chains })
-      ],
-    }]
-  ), [wallets])
+  const connectors = useConnectors()
 
   const wagmiConfig = useMemo(() => createConfig({
     autoConnect: true,
@@ -43,9 +37,7 @@ function EthereumConfig({ children }: { children: React.ReactNode }) {
   }), [connectors])
 
   return (
-      <WagmiConfig config={wagmiConfig}>
-        <RainbowKitProvider chains={chains}>{children}</RainbowKitProvider>
-      </WagmiConfig>
+      <WagmiConfig config={wagmiConfig}>{children}</WagmiConfig>
   );
 }
 
