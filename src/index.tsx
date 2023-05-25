@@ -1,11 +1,13 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 
-import '@rainbow-me/rainbowkit/styles.css';
-
 import './index.css';
 import App from './App';
 import EthereumConfig from './EthereumConfig';
+
+import { Buffer } from 'buffer';
+
+window.Buffer = Buffer
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement,
